@@ -1,44 +1,46 @@
-// Функція для застосування результату
-const applyResult = () => {
-  const inputText = document.getElementById("inputText").value;
-  document.getElementById("displayText").innerText = inputText;
-};
+const inputText = document.getElementById("inputText");
+const applyButton = document.getElementById("applyButton");
+const displayText = document.getElementById("displayText");
 
-// Додати обробник події для кнопки "Apply Result"
-document.getElementById("applyButton").addEventListener("click", applyResult);
-
-// Додати обробник події для виділення тексту
-document.getElementById("displayText").addEventListener("mouseup", (event) => {
-  const selection = window.getSelection().toString();
-  if (selection) {
-    // Виділити текст і змінити колір
-    event.target.innerHTML = event.target.innerHTML.replace(
-      selection,
-      `<span class="highlighted">${selection}</span>`
-    );
+document.addEventListener("DOMContentLoaded", function () {
+  if (applyButton) {
+    applyButton.addEventListener("click", applyResult);
   }
+
+  displayText.addEventListener("dragstart", (e) => {
+    e.preventDefault();
+  });
+
+  displayText.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+  });
+
+  displayText.addEventListener("mousedown", (event) => {
+    const target = event.target;
+    if (target.tagName === "SPAN") {
+      target.style.position = "absolute";
+      target.style.zIndex = 1000;
+
+      let offsetX = event.clientX - target.getBoundingClientRect().left;
+      let offsetY = event.clientY - target.getBoundingClientRect().top;
+
+      function moveLetter(event) {
+        target.style.left = event.clientX - offsetX + "px";
+        target.style.top = event.clientY - offsetY + "px";
+      }
+
+      document.addEventListener("mousemove", moveLetter);
+
+      document.addEventListener("mouseup", (event) => {
+        document.removeEventListener("mousemove", moveLetter);
+      });
+    }
+  });
 });
 
-let isDragging = false;
-let selectedLetters = "";
-
-// Додати обробник події для переміщення літер
-document.addEventListener("mousedown", (event) => {
-  if (event.ctrlKey) {
-    isDragging = true;
-    selectedLetters = window.getSelection().toString();
-  }
-});
-
-document.addEventListener("mousemove", (event) => {
-  if (isDragging) {
-    // Код для переміщення літер
-  }
-});
-
-document.addEventListener("mouseup", (event) => {
-  if (isDragging) {
-    isDragging = false;
-    selectedLetters = "";
-  }
-});
+function applyResult() {
+  displayText.innerHTML = inputText.value
+    .split("")
+    .map((letter) => `<span>${letter}</span>`)
+    .join("");
+}
